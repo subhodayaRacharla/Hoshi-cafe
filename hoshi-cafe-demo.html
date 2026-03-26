@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HOSHI ✦ Cafe — Madhapur, Hyderabad</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Outfit:wght@200;300;400;500;600&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --night: #0A0A12;
+  --deep: #0E0E1A;
+  --midnight: #141422;
+  --star: #F4E8C1;
+  --star-bright: #FFF8E7;
+  --star-dim: #C4B896;
+  --warm: #D4A574;
+  --coffee: #8B6F47;
+  --cream: #F5F0E8;
+  --text: #A8A4B8;
+  --text-light: #7A7690;
+  --glow: rgba(244, 232, 193, 0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--night);
+  color: var(--cream);
+  overflow-x: hidden;
+}
+
+/* Stars Background Canvas */
+.stars-canvas {
+  position: fixed; inset: 0; z-index: 0;
+  pointer-events: none;
+}
+
+/* Loader */
+.loader {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--night);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  transition: opacity 0.8s ease, visibility 0.8s;
+}
+.loader.done { opacity: 0; visibility: hidden; }
+.loader-jp {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 1.8rem; color: var(--star);
+  letter-spacing: 8px; font-weight: 300;
+  animation: breathe 2s ease-in-out infinite;
+}
+.loader-en {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.7rem; letter-spacing: 6px;
+  text-transform: uppercase; color: var(--text-light);
+  margin-top: 0.75rem;
+}
+@keyframes breathe { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+/* Nav */
+nav {
+  position: fixed; top: 0; width: 100%; z-index: 100;
+  padding: 1.2rem 5%;
+  display: flex; justify-content: space-between; align-items: center;
+  transition: all 0.5s;
+}
+nav.scrolled {
+  background: rgba(10,10,18,0.95);
+  backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(244,232,193,0.06);
+}
+.nav-brand {
+  display: flex; align-items: center; gap: 0.75rem;
+}
+.nav-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem; font-weight: 500;
+  color: var(--star); letter-spacing: 3px;
+}
+.nav-jp {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.65rem; color: var(--text-light);
+  letter-spacing: 2px; margin-top: 2px;
+}
+.nav-links { display: flex; gap: 2rem; align-items: center; }
+.nav-links a {
+  font-size: 0.75rem; letter-spacing: 2.5px;
+  text-transform: uppercase; text-decoration: none;
+  color: var(--text); font-weight: 400;
+  transition: color 0.3s;
+  position: relative;
+}
+.nav-links a::after {
+  content: ''; position: absolute;
+  bottom: -4px; left: 0; width: 0; height: 1px;
+  background: var(--star); transition: width 0.3s;
+}
+.nav-links a:hover { color: var(--star); }
+.nav-links a:hover::after { width: 100%; }
+.nav-cta {
+  background: transparent !important;
+  border: 1px solid rgba(244,232,193,0.3) !important;
+  padding: 0.5rem 1.25rem !important;
+  color: var(--star) !important;
+  transition: all 0.3s !important;
+}
+.nav-cta:hover {
+  background: rgba(244,232,193,0.08) !important;
+  border-color: var(--star) !important;
+}
+
+.mobile-toggle { display: none; cursor: pointer; }
+.mobile-toggle span {
+  display: block; width: 22px; height: 1.5px;
+  background: var(--star); margin: 5px 0;
+  transition: 0.3s;
+}
+
+/* Hero */
+.hero {
+  min-height: 100vh; position: relative;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center;
+}
+.hero-overlay {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 40%, rgba(244,232,193,0.04) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 80%, rgba(212,165,116,0.03) 0%, transparent 40%);
+}
+.hero-content { position: relative; z-index: 2; padding: 0 1.5rem; }
+
+.hero-star {
+  font-size: 1.5rem; color: var(--star);
+  opacity: 0; animation: starAppear 1s ease-out 0.3s forwards;
+  margin-bottom: 2rem;
+}
+@keyframes starAppear {
+  0% { opacity: 0; transform: scale(0) rotate(-180deg); }
+  100% { opacity: 0.6; transform: scale(1) rotate(0deg); }
+}
+
+.hero-jp {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: clamp(1rem, 2vw, 1.3rem);
+  font-weight: 300; color: var(--text-light);
+  letter-spacing: 12px;
+  opacity: 0; animation: fadeIn 1s ease-out 0.6s forwards;
+  margin-bottom: 1rem;
+}
+.hero h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(4rem, 10vw, 8rem);
+  font-weight: 300; letter-spacing: 15px;
+  color: var(--star-bright);
+  line-height: 1;
+  opacity: 0; animation: fadeIn 1.2s ease-out 0.8s forwards;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 0 80px rgba(244,232,193,0.15);
+}
+.hero-tagline {
+  font-size: clamp(0.85rem, 1.5vw, 1rem);
+  color: var(--text); font-weight: 300;
+  letter-spacing: 4px; text-transform: uppercase;
+  opacity: 0; animation: fadeIn 1s ease-out 1.2s forwards;
+  margin-bottom: 0.75rem;
+}
+.hero-location {
+  font-size: 0.75rem; color: var(--text-light);
+  letter-spacing: 3px; text-transform: uppercase;
+  opacity: 0; animation: fadeIn 1s ease-out 1.5s forwards;
+  margin-bottom: 3rem;
+}
+.hero-actions {
+  display: flex; gap: 1.25rem; justify-content: center;
+  flex-wrap: wrap;
+  opacity: 0; animation: fadeIn 1s ease-out 1.8s forwards;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.btn {
+  padding: 0.9rem 2.5rem; font-family: 'Outfit', sans-serif;
+  font-size: 0.72rem; font-weight: 500;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  text-decoration: none; cursor: pointer;
+  border: none; transition: all 0.4s;
+}
+.btn-star {
+  background: var(--star); color: var(--night);
+}
+.btn-star:hover {
+  background: var(--star-bright);
+  box-shadow: 0 0 40px rgba(244,232,193,0.2);
+  transform: translateY(-2px);
+}
+.btn-ghost {
+  background: transparent; color: var(--star);
+  border: 1px solid rgba(244,232,193,0.25);
+}
+.btn-ghost:hover {
+  border-color: var(--star);
+  background: rgba(244,232,193,0.05);
+  transform: translateY(-2px);
+}
+
+.scroll-hint {
+  position: absolute; bottom: 2.5rem;
+  left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center;
+  opacity: 0; animation: fadeIn 1s ease-out 2.5s forwards;
+}
+.scroll-dot {
+  width: 3px; height: 3px; border-radius: 50%;
+  background: var(--star); margin-bottom: 8px;
+  animation: drift 2.5s ease-in-out infinite;
+}
+@keyframes drift {
+  0%,100% { transform: translateY(0); opacity: 0.3; }
+  50% { transform: translateY(12px); opacity: 1; }
+}
+.scroll-hint span {
+  font-size: 0.55rem; letter-spacing: 4px;
+  text-transform: uppercase; color: var(--text-light);
+}
+
+/* Section */
+.section {
+  position: relative; z-index: 2;
+  padding: 7rem 5%;
+}
+.section-eyebrow {
+  font-size: 0.6rem; letter-spacing: 5px;
+  text-transform: uppercase; color: var(--star-dim);
+  margin-bottom: 1.25rem;
+  display: flex; align-items: center; gap: 1rem;
+}
+.section-eyebrow::before {
+  content: ''; width: 30px; height: 1px;
+  background: linear-gradient(90deg, var(--star-dim), transparent);
+}
+.section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2rem, 4.5vw, 3.2rem);
+  font-weight: 400; line-height: 1.2;
+  margin-bottom: 1rem; letter-spacing: 1px;
+}
+.section-desc {
+  color: var(--text); font-size: 0.95rem;
+  max-width: 500px; line-height: 1.8;
+  font-weight: 300;
+}
+
+/* About / Vibe */
+.vibe-section { overflow: hidden; }
+.vibe-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 4rem; align-items: center;
+  margin-top: 3rem;
+}
+.vibe-visual {
+  position: relative;
+  aspect-ratio: 4/5;
+  background: linear-gradient(160deg, #1a1828, #12111e, #1e1a14);
+  border: 1px solid rgba(244,232,193,0.06);
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.vibe-visual::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at 30% 70%, rgba(212,165,116,0.08), transparent 60%);
+}
+.vibe-icon {
+  font-size: 5rem; opacity: 0.12;
+  filter: grayscale(0.5);
+}
+.vibe-text h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem; font-weight: 400;
+  margin-bottom: 1.5rem; line-height: 1.4;
+  color: var(--star-bright);
+}
+.vibe-text p {
+  color: var(--text); font-size: 0.9rem;
+  line-height: 1.9; font-weight: 300;
+  margin-bottom: 1rem;
+}
+.vibe-detail {
+  display: flex; gap: 2.5rem; margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(244,232,193,0.06);
+}
+.vibe-detail-item span {
+  display: block; font-family: 'Cormorant Garamond', serif;
+  font-size: 1.5rem; color: var(--star); font-weight: 400;
+}
+.vibe-detail-item small {
+  font-size: 0.65rem; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--text-light);
+}
+
+/* Menu */
+.menu-section { background: var(--deep); }
+.menu-categories {
+  display: flex; gap: 1rem; margin: 3rem 0 2rem;
+  flex-wrap: wrap;
+}
+.menu-cat {
+  padding: 0.5rem 1.5rem;
+  font-size: 0.7rem; letter-spacing: 2px;
+  text-transform: uppercase; font-weight: 400;
+  background: transparent;
+  border: 1px solid rgba(244,232,193,0.1);
+  color: var(--text); cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  transition: all 0.3s;
+}
+.menu-cat.active, .menu-cat:hover {
+  border-color: var(--star);
+  color: var(--star);
+  background: rgba(244,232,193,0.05);
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1px;
+  background: rgba(244,232,193,0.04);
+  border: 1px solid rgba(244,232,193,0.04);
+}
+.menu-item {
+  background: var(--deep);
+  padding: 2rem;
+  display: flex; justify-content: space-between;
+  align-items: flex-start; gap: 1.5rem;
+  transition: background 0.3s;
+}
+.menu-item:hover { background: rgba(244,232,193,0.02); }
+.menu-item-info { flex: 1; }
+.menu-item-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.15rem; font-weight: 500;
+  margin-bottom: 0.4rem; color: var(--cream);
+}
+.menu-item-desc {
+  font-size: 0.8rem; color: var(--text-light);
+  line-height: 1.6; font-weight: 300;
+}
+.menu-item-tag {
+  display: inline-block; margin-top: 0.5rem;
+  font-size: 0.6rem; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--warm);
+  padding: 0.2rem 0.5rem;
+  border: 1px solid rgba(212,165,116,0.2);
+}
+.menu-item-price {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.2rem; color: var(--star);
+  font-weight: 400; white-space: nowrap;
+}
+
+/* Experience Section */
+.exp-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem; margin-top: 3rem;
+}
+.exp-card {
+  padding: 2.5rem 2rem;
+  border: 1px solid rgba(244,232,193,0.06);
+  background: rgba(244,232,193,0.01);
+  transition: all 0.4s;
+  position: relative;
+}
+.exp-card::after {
+  content: ''; position: absolute; top: 0; left: 0;
+  width: 0; height: 1px;
+  background: var(--star);
+  transition: width 0.5s;
+}
+.exp-card:hover::after { width: 100%; }
+.exp-card:hover { border-color: rgba(244,232,193,0.15); }
+.exp-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.5rem; color: rgba(244,232,193,0.1);
+  font-weight: 300; margin-bottom: 1rem;
+}
+.exp-title {
+  font-size: 0.95rem; font-weight: 500;
+  margin-bottom: 0.75rem; letter-spacing: 0.5px;
+}
+.exp-text {
+  font-size: 0.82rem; color: var(--text);
+  line-height: 1.8; font-weight: 300;
+}
+
+/* Hours & Location */
+.info-section {
+  background: linear-gradient(180deg, var(--night), var(--deep));
+}
+.info-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 4rem; margin-top: 3rem;
+}
+.info-block h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.4rem; font-weight: 400;
+  margin-bottom: 1.5rem; color: var(--star-bright);
+}
+.hours-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.hours-table tr {
+  border-bottom: 1px solid rgba(244,232,193,0.05);
+}
+.hours-table td {
+  padding: 0.8rem 0;
+  font-size: 0.85rem; font-weight: 300;
+  color: var(--text);
+}
+.hours-table td:last-child {
+  text-align: right; color: var(--cream);
+  font-weight: 400;
+}
+.hours-note {
+  margin-top: 1.25rem;
+  font-size: 0.75rem; color: var(--text-light);
+  font-style: italic;
+}
+.location-address {
+  font-size: 0.95rem; color: var(--text);
+  line-height: 1.8; font-weight: 300;
+  margin-bottom: 1.5rem;
+}
+.location-map {
+  width: 100%; height: 220px;
+  border: 1px solid rgba(244,232,193,0.06);
+  background: var(--midnight);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; color: var(--text-light);
+  letter-spacing: 2px; text-transform: uppercase;
+  margin-bottom: 1.5rem;
+  cursor: pointer; transition: border-color 0.3s;
+}
+.location-map:hover { border-color: rgba(244,232,193,0.2); }
+.location-actions {
+  display: flex; gap: 0.75rem; flex-wrap: wrap;
+}
+.loc-btn {
+  padding: 0.65rem 1.5rem;
+  font-size: 0.7rem; letter-spacing: 2px;
+  text-transform: uppercase; font-weight: 500;
+  text-decoration: none; font-family: 'Outfit', sans-serif;
+  transition: all 0.3s; border: none; cursor: pointer;
+}
+.loc-btn.primary { background: var(--star); color: var(--night); }
+.loc-btn.primary:hover { background: var(--star-bright); }
+.loc-btn.whatsapp { background: #25D366; color: #fff; }
+.loc-btn.whatsapp:hover { background: #20BD5A; }
+.loc-btn.maps {
+  background: transparent; color: var(--text);
+  border: 1px solid rgba(244,232,193,0.15);
+}
+.loc-btn.maps:hover { border-color: var(--star); color: var(--star); }
+
+/* CTA */
+.cta-section {
+  text-align: center; padding: 6rem 5%;
+  position: relative; z-index: 2;
+}
+.cta-star {
+  font-size: 1.2rem; color: var(--star);
+  opacity: 0.4; margin-bottom: 2rem;
+}
+.cta-section .section-title {
+  max-width: 500px; margin: 0 auto 1rem;
+}
+.cta-section .section-desc {
+  max-width: 420px; margin: 0 auto 2.5rem;
+  text-align: center;
+}
+.cta-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+.cta-phone {
+  margin-top: 2.5rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem; color: var(--star-dim);
+}
+.cta-phone a { color: var(--star); text-decoration: none; }
+
+/* Footer */
+footer {
+  padding: 2.5rem 5%;
+  border-top: 1px solid rgba(244,232,193,0.05);
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 1rem;
+  position: relative; z-index: 2;
+}
+.footer-brand {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem; color: var(--star-dim);
+  letter-spacing: 3px;
+}
+.footer-copy {
+  font-size: 0.7rem; color: var(--text-light);
+  letter-spacing: 1px;
+}
+.footer-social { display: flex; gap: 1.5rem; }
+.footer-social a {
+  font-size: 0.7rem; color: var(--text-light);
+  text-decoration: none; letter-spacing: 1.5px;
+  text-transform: uppercase; transition: color 0.3s;
+}
+.footer-social a:hover { color: var(--star); }
+
+/* Floating WhatsApp */
+.wa-float {
+  position: fixed; bottom: 1.5rem; right: 1.5rem;
+  width: 56px; height: 56px; border-radius: 50%;
+  background: #25D366; color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; z-index: 90;
+  text-decoration: none;
+  box-shadow: 0 4px 24px rgba(37,211,102,0.35);
+  opacity: 0; animation: fadeIn 0.5s ease-out 3s forwards;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.wa-float:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 32px rgba(37,211,102,0.5);
+}
+
+/* Divider */
+.divider {
+  width: 100%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(244,232,193,0.08), transparent);
+  position: relative; z-index: 2;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .mobile-toggle { display: block; }
+  .nav-links.open {
+    display: flex; flex-direction: column;
+    position: fixed; inset: 0;
+    background: rgba(10,10,18,0.98);
+    justify-content: center; align-items: center;
+    gap: 2rem; z-index: 99;
+  }
+  .hero h1 { letter-spacing: 6px; }
+  .vibe-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+  .exp-grid { grid-template-columns: 1fr; }
+  .info-grid { grid-template-columns: 1fr; gap: 3rem; }
+  .section { padding: 5rem 6%; }
+  .vibe-detail { gap: 1.5rem; }
+  footer { flex-direction: column; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- Stars -->
+<canvas class="stars-canvas" id="starsCanvas"></canvas>
+
+<!-- Loader -->
+<div class="loader" id="loader">
+  <div class="loader-jp">ほし</div>
+  <div class="loader-en">Cafe · Madhapur</div>
+</div>
+
+<!-- Nav -->
+<nav id="nav">
+  <div class="nav-brand">
+    <div>
+      <div class="nav-logo">HOSHI</div>
+      <div class="nav-jp">ほし · カフェ</div>
+    </div>
+  </div>
+  <div class="nav-links" id="navLinks">
+    <a href="#menu">Menu</a>
+    <a href="#about">About</a>
+    <a href="#visit">Visit</a>
+    <a href="https://www.instagram.com/hoshi.hyd" target="_blank">Instagram</a>
+    <a href="https://wa.me/91XXXXXXXXXX?text=Hi%2C%20I%27d%20like%20to%20know%20more%20about%20Hoshi%20Cafe" class="nav-cta">Reserve</a>
+  </div>
+  <div class="mobile-toggle" onclick="document.getElementById('navLinks').classList.toggle('open')">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-star">✦</div>
+    <div class="hero-jp">ほし</div>
+    <h1>HOSHI</h1>
+    <div class="hero-tagline">Coffee · Bites · Community</div>
+    <div class="hero-location">Kavuri Hills, Madhapur · Hyderabad</div>
+    <div class="hero-actions">
+      <a href="#menu" class="btn btn-star">Explore Menu</a>
+      <a href="https://wa.me/91XXXXXXXXXX?text=Hi%2C%20I%20want%20to%20reserve%20a%20table%20at%20Hoshi" class="btn btn-ghost">Reserve a Table</a>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <div class="scroll-dot"></div>
+    <span>Explore</span>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- About / Vibe -->
+<section class="section vibe-section" id="about">
+  <div class="section-eyebrow">Our Story</div>
+  <div class="section-title">Where Every Cup<br>Tells a Story</div>
+
+  <div class="vibe-grid">
+    <div class="vibe-visual">
+      <span class="vibe-icon">☕</span>
+    </div>
+    <div class="vibe-text">
+      <h3>A star was born in<br>the heart of Madhapur</h3>
+      <p>Hoshi — meaning "star" in Japanese — is more than a cafe. It's a space where the aroma of freshly brewed coffee meets the warmth of community. Our counter-centric layout puts the baristas at the heart of everything, creating an experience where coffee isn't just served — it's performed.</p>
+      <p>Whether you're here for a morning espresso, a late-night latte, or our signature chicken sandos — every visit is designed to feel like a constellation aligning just for you.</p>
+      <div class="vibe-detail">
+        <div class="vibe-detail-item">
+          <span>2025</span>
+          <small>Established</small>
+        </div>
+        <div class="vibe-detail-item">
+          <span>12hr</span>
+          <small>Daily Service</small>
+        </div>
+        <div class="vibe-detail-item">
+          <span>✦</span>
+          <small>Counter-Centric</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Menu -->
+<section class="section menu-section" id="menu">
+  <div class="section-eyebrow">The Menu</div>
+  <div class="section-title">Crafted with Care</div>
+  <div class="section-desc">Every item on our menu is made fresh, with ingredients sourced for quality and taste.</div>
+
+  <div class="menu-categories">
+    <button class="menu-cat active" onclick="filterMenu('all', this)">All</button>
+    <button class="menu-cat" onclick="filterMenu('coffee', this)">Coffee</button>
+    <button class="menu-cat" onclick="filterMenu('bites', this)">Bites</button>
+    <button class="menu-cat" onclick="filterMenu('specialty', this)">Specialty</button>
+    <button class="menu-cat" onclick="filterMenu('cold', this)">Cold Drinks</button>
+  </div>
+
+  <div class="menu-grid" id="menuGrid">
+    <div class="menu-item" data-cat="coffee">
+      <div class="menu-item-info">
+        <div class="menu-item-name">Classic Espresso</div>
+        <div class="menu-item-desc">Rich, bold single-origin shot pulled to perfection</div>
+      </div>
+      <div class="menu-item-price">₹149</div>
+    </div>
+    <div class="menu-item" data-cat="coffee">
+      <div class="menu-item-info">
+        <div class="menu-item-name">Café Latte</div>
+        <div class="menu-item-desc">Silky steamed milk over espresso with latte art</div>
+      </div>
+      <div class="menu-item-price">₹199</div>
+    </div>
+    <div class="menu-item" data-cat="specialty">
+      <div class="menu-item-info">
+        <div class="menu-item-name">Orange Espresso</div>
+        <div class="menu-item-desc">Bold espresso meets fresh citrus — our signature punchy blend</div>
+        <span class="menu-item-tag">Signature</span>
+      </div>
+      <div class="menu-item-price">₹229</div>
+    </div>
+    <div class="menu-item" data-cat="coffee">
+      <div class="menu-item-info">
+        <div class="menu-item-name">Cappuccino</div>
+        <div class="menu-item-desc">Perfect balance of espresso, steamed milk, and velvety foam</div>
+      </div>
+      <div class="menu-item-price">₹189</div>
+    </div>
+    <div class="menu-item" data-cat="bites">
+      <div class="menu-item-info">
+        <div class="menu-item-name">Chicken Sando</div>
+        <div class="menu-item-desc">Crispy chicken katsu, slaw, house sauce on milk bread</div>
+        <span class="menu-item-tag">Best Seller</span>
+      </div>
+      <div class="menu-item-price">₹299</div>
+    </div>
+    <div class="menu-item" data-cat="bites">
+      <div class="menu-item-info">
+        <div class="menu-item-name">Grilled Panini</div>
+        <div class="menu-item-desc">Sourdough pressed with mozzarella, pesto & roasted veggies</div>
+      </div>
+      <div class="menu-item-price">₹249</div>
+    </div>
+    <div class="menu-item" data-cat="cold">
+      <div class="menu-item-info">
+        <div class="menu-item-name">Iced Americano</div>
+        <div class="menu-item-desc">Double shot over ice — clean, crisp, refreshing</div>
+      </div>
+      <div class="menu-item-price">₹179</div>
+    </div>
+    <div class="menu-item" data-cat="specialty">
+      <div class="menu-item-info">
+        <div class="menu-item-name">Matcha Latte</div>
+        <div class="menu-item-desc">Ceremonial-grade matcha whisked with oat milk</div>
+        <span class="menu-item-tag">Popular</span>
+      </div>
+      <div class="menu-item-price">₹249</div>
+    </div>
+    <div class="menu-item" data-cat="cold">
+      <div class="menu-item-info">
+        <div class="menu-item-name">Cold Brew</div>
+        <div class="menu-item-desc">18-hour steeped, smooth, low-acidity cold brew on ice</div>
+      </div>
+      <div class="menu-item-price">₹219</div>
+    </div>
+    <div class="menu-item" data-cat="bites">
+      <div class="menu-item-info">
+        <div class="menu-item-name">Croissant Butter</div>
+        <div class="menu-item-desc">Flaky, golden, freshly baked with premium French butter</div>
+      </div>
+      <div class="menu-item-price">₹149</div>
+    </div>
+  </div>
+
+  <p style="margin-top: 2rem; font-size: 0.75rem; color: var(--text-light); text-align: center; letter-spacing: 1px;">
+    * Prices are indicative. Full menu available at the cafe.
+  </p>
+</section>
+
+<div class="divider"></div>
+
+<!-- Experience -->
+<section class="section">
+  <div class="section-eyebrow">The Experience</div>
+  <div class="section-title">Why Hoshi</div>
+
+  <div class="exp-grid">
+    <div class="exp-card">
+      <div class="exp-num">01</div>
+      <div class="exp-title">Counter-Centric Design</div>
+      <div class="exp-text">Our coffee station sits at the heart of the space. Watch your drink being crafted — every pour, every pull, every detail.</div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-num">02</div>
+      <div class="exp-title">Late Night Coffee</div>
+      <div class="exp-text">Open till 11 PM. When the city winds down, Hoshi comes alive. Perfect for night owls and deep conversations.</div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-num">03</div>
+      <div class="exp-title">Aesthetic Space</div>
+      <div class="exp-text">Designed for the gram but built for real comfort. Minimal, warm, and thoughtfully curated for every mood.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Hours & Location -->
+<section class="section info-section" id="visit">
+  <div class="section-eyebrow">Find Us</div>
+  <div class="section-title">Visit Hoshi</div>
+
+  <div class="info-grid">
+    <div class="info-block">
+      <h3>Hours</h3>
+      <table class="hours-table">
+        <tr><td>Monday</td><td>11:00 AM — 11:00 PM</td></tr>
+        <tr><td>Tuesday</td><td>11:00 AM — 11:00 PM</td></tr>
+        <tr><td>Wednesday</td><td>11:00 AM — 11:00 PM</td></tr>
+        <tr><td>Thursday</td><td>11:00 AM — 11:00 PM</td></tr>
+        <tr><td>Friday</td><td>11:00 AM — 11:00 PM</td></tr>
+        <tr><td>Saturday</td><td>11:00 AM — 11:00 PM</td></tr>
+        <tr><td>Sunday</td><td>11:00 AM — 11:00 PM</td></tr>
+      </table>
+      <p class="hours-note">✦ Open 7 days a week. Walk-ins welcome.</p>
+    </div>
+    <div class="info-block">
+      <h3>Location</h3>
+      <div class="location-address">
+        Guttala Begumpet, Kavuri Hills,<br>
+        Madhapur, Hyderabad,<br>
+        Telangana — 500081
+      </div>
+      <a href="https://maps.google.com/?q=Hoshi+Cafe+Kavuri+Hills+Madhapur+Hyderabad" target="_blank" class="location-map">
+        ✦ &nbsp; Open in Google Maps &nbsp; ✦
+      </a>
+      <div class="location-actions">
+        <a href="tel:+91XXXXXXXXXX" class="loc-btn primary">Call Us</a>
+        <a href="https://wa.me/91XXXXXXXXXX?text=Hi%20Hoshi%2C%20I%27d%20like%20to%20visit!" class="loc-btn whatsapp">WhatsApp</a>
+        <a href="https://maps.google.com/?q=Hoshi+Cafe+Kavuri+Hills+Madhapur+Hyderabad" target="_blank" class="loc-btn maps">Directions</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-star">✦</div>
+  <div class="section-title">Follow the Star<br>to Kavuri Hills</div>
+  <div class="section-desc">Great coffee, warm vibes, and late-night conversations await you at Hoshi.</div>
+  <div class="cta-actions">
+    <a href="https://wa.me/91XXXXXXXXXX?text=Hi%2C%20I%27d%20like%20to%20reserve%20a%20table" class="btn btn-star">Reserve on WhatsApp</a>
+    <a href="https://www.instagram.com/hoshi.hyd" target="_blank" class="btn btn-ghost">Follow on Instagram</a>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-brand">HOSHI ✦ ほし</div>
+  <div class="footer-copy">© 2025 Hoshi Cafe, Hyderabad. All Rights Reserved.</div>
+  <div class="footer-social">
+    <a href="https://www.instagram.com/hoshi.hyd" target="_blank">Instagram</a>
+  </div>
+</footer>
+
+<!-- Floating WhatsApp -->
+<a href="https://wa.me/91XXXXXXXXXX?text=Hi%20from%20your%20website!%20I%27d%20like%20to%20know%20more%20about%20Hoshi" class="wa-float" title="Chat with Hoshi">💬</a>
+
+<script>
+// Stars canvas
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight * 3;
+}
+
+function createStars() {
+  stars = [];
+  const count = Math.floor((canvas.width * canvas.height) / 8000);
+  for (let i = 0; i < count; i++) {
+    stars.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.2 + 0.2,
+      a: Math.random() * 0.6 + 0.1,
+      speed: Math.random() * 0.005 + 0.002,
+      phase: Math.random() * Math.PI * 2
+    });
+  }
+}
+
+function drawStars(time) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  stars.forEach(s => {
+    const twinkle = Math.sin(time * s.speed + s.phase) * 0.3 + 0.7;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(244, 232, 193, ${s.a * twinkle})`;
+    ctx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}
+
+resizeCanvas();
+createStars();
+requestAnimationFrame(drawStars);
+window.addEventListener('resize', () => { resizeCanvas(); createStars(); });
+
+// Loader
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('loader').classList.add('done'), 1200);
+});
+
+// Nav scroll
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// Menu filter
+function filterMenu(cat, btn) {
+  document.querySelectorAll('.menu-cat').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.menu-item').forEach(item => {
+    if (cat === 'all' || item.dataset.cat === cat) {
+      item.style.display = 'flex';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+}
+
+// Scroll animations
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.menu-item, .exp-card, .vibe-grid, .info-grid').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(20px)';
+  el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+  observer.observe(el);
+});
+</script>
+</body>
+</html>
